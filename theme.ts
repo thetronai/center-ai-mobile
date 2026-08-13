@@ -46,6 +46,7 @@ export const colors = {
   meta: "#7a8299",
   badgeSuccessBg: "#edf7f2",
   badgeSuccessBorder: "#c2e5d1",
+  badgeSuccessText: "#297a4e",
 } as const;
 
 export const fonts = {
