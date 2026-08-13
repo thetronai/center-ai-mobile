@@ -1,10 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import type { SignalLevel } from "../types/systemStatus";
+import { colors } from "../theme";
 
 const COLORS: Record<SignalLevel, string> = {
-  good: "#10b981",
-  warn: "#f59e0b",
-  major: "#ef4444",
+  good: colors.green500,
+  warn: colors.amber500,
+  major: colors.red500,
 };
 
 /** Renders the 10-entry signal history, oldest (left) to newest (right). */

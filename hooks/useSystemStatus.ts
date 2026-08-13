@@ -58,12 +58,15 @@ function simulateOutcome(scenario: SimulatedScenario): Promise<FetchOutcome> {
 interface UseSystemStatusResult {
   state: MonitoringState;
   retry: () => void;
+  /** Set the moment we last got a real (non-forced-loading) response. */
+  lastFetchedAt: Date | null;
 }
 
 export function useSystemStatus(scenario: Scenario): UseSystemStatusResult {
   const [deviceOnline, setDeviceOnline] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
   const [result, setResult] = useState<FetchResult | null>(null);
+  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -97,7 +100,10 @@ export function useSystemStatus(scenario: Scenario): UseSystemStatusResult {
                   : ({ kind: "success", data } as const)
               );
 
-        if (!ignore) setResult({ requestKey, outcome });
+        if (!ignore) {
+          setResult({ requestKey, outcome });
+          if (outcome.kind !== "error") setLastFetchedAt(new Date());
+        }
       } catch (err) {
         if (ignore) return;
 
@@ -143,5 +149,5 @@ export function useSystemStatus(scenario: Scenario): UseSystemStatusResult {
       ? result.outcome
       : { kind: "loading" };
 
-  return { state, retry };
+  return { state, retry, lastFetchedAt };
 }
