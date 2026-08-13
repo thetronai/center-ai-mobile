@@ -10,6 +10,16 @@ export const SYSTEM_STATUS_API_URL =
 // needs enough headroom to cover a cold start rather than just a slow reply.
 const REQUEST_TIMEOUT_MS = 30000;
 
+// Observed on iOS Simulator specifically (not Android, not curl from the
+// Mac): fetch() intermittently throws "The network connection was lost"
+// (NSURLErrorNetworkConnectionLost). The upstream is behind Cloudflare with
+// HTTP/3 advertised (`alt-svc: h3`), and iOS's QUIC negotiation over the
+// Simulator's virtualized network adapter is a known-flaky combination —
+// this doesn't reproduce on a physical device. One silent retry papers over
+// the one-off connection drop without masking a genuinely dead backend.
+const MAX_ATTEMPTS = 2;
+const RETRY_DELAY_MS = 500;
+
 export class RateLimitedError extends Error {
   retryAfterSeconds: number | null;
 
@@ -30,20 +40,11 @@ export class UpstreamError extends Error {
   }
 }
 
-/**
- * Calls the live system-status endpoint directly from React Native — unlike
- * the web app, there's no server layer to proxy through here, and the client
- * confirmed a direct native call is expected (no CORS restriction on-device).
- *
- * Times out and surfaces as an UpstreamError if the request hangs — observed
- * in testing (Expo Go on iOS Simulator) that fetch() can stall indefinitely
- * on this endpoint's chunked/keep-alive response without ever resolving or
- * rejecting on its own. Without this, a stalled request left the screen
- * stuck on the loading state forever with no way to recover.
- */
-export async function fetchSystemStatus(
-  signal?: AbortSignal
-): Promise<SystemStatusResponse> {
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function attemptFetch(signal?: AbortSignal): Promise<Response> {
   const timeoutController = new AbortController();
   const timeoutId = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
 
@@ -51,9 +52,8 @@ export async function fetchSystemStatus(
   const onCallerAbort = () => timeoutController.abort();
   signal?.addEventListener("abort", onCallerAbort);
 
-  let response: Response;
   try {
-    response = await fetch(SYSTEM_STATUS_API_URL, { signal: timeoutController.signal });
+    return await fetch(SYSTEM_STATUS_API_URL, { signal: timeoutController.signal });
   } catch (err) {
     if (timeoutController.signal.aborted) {
       throw new UpstreamError("Request timed out.");
@@ -62,6 +62,32 @@ export async function fetchSystemStatus(
   } finally {
     clearTimeout(timeoutId);
     signal?.removeEventListener("abort", onCallerAbort);
+  }
+}
+
+/**
+ * Calls the live system-status endpoint directly from React Native — unlike
+ * the web app, there's no server layer to proxy through here, and the client
+ * confirmed a direct native call is expected (no CORS restriction on-device).
+ */
+export async function fetchSystemStatus(
+  signal?: AbortSignal
+): Promise<SystemStatusResponse> {
+  let response: Response | undefined;
+  let lastError: UpstreamError | undefined;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      response = await attemptFetch(signal);
+      break;
+    } catch (err) {
+      lastError = err as UpstreamError;
+      if (attempt < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS);
+    }
+  }
+
+  if (!response) {
+    throw lastError ?? new UpstreamError("Network request failed");
   }
 
   if (response.status === 429) {
