@@ -41,27 +41,32 @@ export function StateScreen({
   const iconTone = ICON_TONES[tone];
   return (
     <View style={styles.container}>
-      <View style={[styles.iconCircle, { backgroundColor: iconTone.bg }]}>
-        <Icon color={iconTone.fg} />
-      </View>
-      <Text style={styles.heading}>{heading}</Text>
-      <Text style={styles.body}>{body}</Text>
-
-      {infoBox && (
-        <View style={styles.infoBox}>
-          <Text style={styles.infoBoxText}>{infoBox}</Text>
+      {/* Nudged up from dead-center: a solid button at the bottom of the
+          block reads as visually heavier than the icon/text above it, so
+          exact mathematical centering looks like it's sitting too low. */}
+      <View style={styles.opticalCenter}>
+        <View style={[styles.iconCircle, { backgroundColor: iconTone.bg }]}>
+          <Icon color={iconTone.fg} />
         </View>
-      )}
+        <Text style={styles.heading}>{heading}</Text>
+        <Text style={styles.body}>{body}</Text>
 
-      <View style={styles.actions}>
-        <Pressable onPress={primaryAction.onPress} style={styles.primaryButton}>
-          <Text style={styles.primaryButtonText}>{primaryAction.label}</Text>
-        </Pressable>
-        {secondaryAction && (
-          <Pressable onPress={secondaryAction.onPress} style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>{secondaryAction.label}</Text>
-          </Pressable>
+        {infoBox && (
+          <View style={styles.infoBox}>
+            <Text style={styles.infoBoxText}>{infoBox}</Text>
+          </View>
         )}
+
+        <View style={styles.actions}>
+          <Pressable onPress={primaryAction.onPress} style={styles.primaryButton}>
+            <Text style={styles.primaryButtonText}>{primaryAction.label}</Text>
+          </Pressable>
+          {secondaryAction && (
+            <Pressable onPress={secondaryAction.onPress} style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>{secondaryAction.label}</Text>
+            </Pressable>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -74,6 +79,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 24,
     backgroundColor: colors.cream,
+  },
+  opticalCenter: {
+    width: "100%",
+    alignItems: "center",
+    transform: [{ translateY: -24 }],
   },
   iconCircle: {
     width: 64,
