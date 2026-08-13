@@ -15,10 +15,11 @@ const REQUEST_TIMEOUT_MS = 30000;
 // (NSURLErrorNetworkConnectionLost). The upstream is behind Cloudflare with
 // HTTP/3 advertised (`alt-svc: h3`), and iOS's QUIC negotiation over the
 // Simulator's virtualized network adapter is a known-flaky combination —
-// this doesn't reproduce on a physical device. One silent retry papers over
-// the one-off connection drop without masking a genuinely dead backend.
-const MAX_ATTEMPTS = 2;
-const RETRY_DELAY_MS = 500;
+// this doesn't reproduce on a physical device. A few silent retries with
+// backoff paper over the connection drop without masking a genuinely dead
+// backend (still surfaces as an error once every attempt fails).
+const MAX_ATTEMPTS = 4;
+const RETRY_DELAY_MS = 600;
 
 export class RateLimitedError extends Error {
   retryAfterSeconds: number | null;
@@ -82,7 +83,7 @@ export async function fetchSystemStatus(
       break;
     } catch (err) {
       lastError = err as UpstreamError;
-      if (attempt < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS);
+      if (attempt < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS * attempt);
     }
   }
 
