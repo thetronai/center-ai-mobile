@@ -102,7 +102,8 @@ const styles = StyleSheet.create({
   body: {
     fontFamily: fonts.bodyRegular,
     fontSize: 14,
-    color: colors.grey600,
+    lineHeight: 16.8,
+    color: colors.meta,
     textAlign: "center",
     marginTop: 8,
   },
@@ -119,7 +120,8 @@ const styles = StyleSheet.create({
   infoBoxText: {
     fontFamily: fonts.bodyRegular,
     fontSize: 13,
-    color: colors.grey600,
+    lineHeight: 15.6,
+    color: colors.meta,
     textAlign: "center",
   },
   actions: {

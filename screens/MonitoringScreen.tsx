@@ -138,11 +138,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     backgroundColor: colors.white,
+    alignItems: "center",
   },
   headerTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 18,
+    fontFamily: fonts.displaySemiBold,
+    fontSize: 14,
+    lineHeight: 18.4,
     color: colors.grey900,
+    textAlign: "center",
   },
   centerFill: {
     flex: 1,
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontFamily: fonts.bodyRegular,
     fontSize: 13,
-    color: colors.grey500,
+    color: colors.meta,
   },
   scrollView: {
     backgroundColor: colors.cream,
@@ -167,11 +170,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontFamily: fonts.bodySemiBold,
+    fontFamily: fonts.bodyMedium,
     fontSize: 12,
+    lineHeight: 16.8,
     color: colors.grey500,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
     marginBottom: 8,
   },
   card: {
@@ -191,14 +194,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardTitle: {
-    fontFamily: fonts.displayBold,
+    fontFamily: fonts.displaySemiBold,
     fontSize: 14,
-    color: colors.grey900,
+    lineHeight: 16.8,
+    color: colors.blue900,
   },
   disclaimer: {
     fontFamily: fonts.bodyRegular,
     fontSize: 12,
-    color: colors.grey500,
+    lineHeight: 14.4,
+    color: colors.meta,
     marginTop: 4,
   },
 });

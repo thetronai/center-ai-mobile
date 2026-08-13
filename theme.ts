@@ -40,6 +40,12 @@ export const colors = {
   red700: "#b91c1c",
   green500: "#10b981",
   white: "#ffffff",
+
+  // Confirmed from Figma dev-mode inspection: meta/secondary text color,
+  // and the Active/Operational badge's exact bg + border pair.
+  meta: "#7a8299",
+  badgeSuccessBg: "#edf7f2",
+  badgeSuccessBorder: "#c2e5d1",
 } as const;
 
 export const fonts = {
